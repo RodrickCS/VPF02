@@ -22,7 +22,7 @@ public class FormManutencoes extends JFrame implements ActionListener {
 	private JPanel panel;
 	private JLabel id, data, equipamento, custo, tempo;
 	private JTextField tfId, tfData, tfCusto, tfTempo;
-	private JButton btBuscar, btExcluir, btCadastrar;
+	private JButton btBuscar, btExcluir, btCadastrar, btAlterar;
 	private JTextArea listar;
 	private JComboBox<String> cbEquipamento;
 	private int autoId = ProcessaManutencoes.man.size() + 1;
@@ -96,13 +96,21 @@ public class FormManutencoes extends JFrame implements ActionListener {
 		btExcluir = new JButton("Excluir");
 		btExcluir.setBounds(505, 50, 100, 20);
 		panel.add(btExcluir);
+		btExcluir.setEnabled(false);
 
 		btBuscar = new JButton("Buscar");
 		btBuscar.setBounds(610, 50, 100, 20);
 		panel.add(btBuscar);
+		btBuscar.setEnabled(false);
+
+		btAlterar = new JButton("Alterar");
+		btAlterar.setBounds(505, 80, 100, 20);
+		panel.add(btAlterar);
+		btAlterar.setEnabled(false);
 
 		btBuscar.addActionListener(this);
 		btCadastrar.addActionListener(this);
+		btAlterar.addActionListener(this);
 		btExcluir.addActionListener(this);
 
 	}
@@ -216,16 +224,61 @@ public class FormManutencoes extends JFrame implements ActionListener {
 		ProcessaManutencoes.salvar();
 	}
 
+	private void alterar() {
+		int id = Integer.parseInt(tfId.getText());
+		Manutencao man = new Manutencao(id);
+		int indice = ProcessaManutencoes.man.indexOf(man);
+
+		if (tfData.getText().length() != 0 && tfCusto.getText().length() != 0 && tfTempo.getText().length() != 0) {
+
+			try {
+				ProcessaManutencoes.man.set(indice,
+						new Manutencao(autoId, converterData(), cbEquipamento.getSelectedItem().toString(),
+								Double.parseDouble(tfCusto.getText()), Double.parseDouble(tfTempo.getText())));
+
+			} catch (NumberFormatException e) {
+
+				System.out.println(e.toString());
+			} catch (ParseException e) {
+
+				System.out.println(e.toString());
+			}
+			autoId++;
+			preencherArea();
+			limparCampos();
+
+		} else {
+			JOptionPane.showMessageDialog(this, "Favor preencher todos os campos");
+		}
+		tfId.setText(String.format("%d", autoId));
+		ProcessaManutencoes.salvar();
+
+	}
+
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == btCadastrar) {
 			cadastrar();
+			btBuscar.setEnabled(true);
+			btExcluir.setEnabled(false);
+			btExcluir.setEnabled(false);
 		}
 		if (e.getSource() == btBuscar) {
 			buscar();
+			btCadastrar.setEnabled(false);
+			btExcluir.setEnabled(true);
+			btAlterar.setEnabled(true);
 		}
 		if (e.getSource() == btExcluir) {
 			excluir();
+			btCadastrar.setEnabled(true);
+			btAlterar.setEnabled(false);
+			btExcluir.setEnabled(false);
+		}
+		if (e.getSource() == btAlterar) {
+			alterar();
+			btAlterar.setEnabled(false);
+			btCadastrar.setEnabled(true);
 		}
 
 	}
